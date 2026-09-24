@@ -162,7 +162,9 @@ def recency_scores(index: Index, cfg=config) -> np.ndarray:
 # ---------------------------------------------------------------------------
 
 
-def driver_groups(index: Index, known: list[int], idf: dict[int, float], cfg=config) -> dict[int, int]:
+def driver_groups(
+    index: Index, known: list[int], idf: dict[int, float], cfg=config
+) -> dict[int, int]:
     """Group the user's mods that live in nearly the same collections (a mod
     series, a mod + its patches). Without this, 40 mods from one author that
     only ever appear together count the same two collections 40 times.
@@ -222,7 +224,7 @@ def score(
         co_w = (Xw[:, pos].T @ X).toarray() / index.W  # p(A, C)
         co_n = (X[:, pos].T @ X).toarray()  # distinct collections with both
         with np.errstate(divide="ignore", invalid="ignore"):
-            lift = co_w / (p[pos][:, None] * p[None, :])
+            lift = co_w / (p[pos][:, None] * p[None, :] ** cfg.CANDIDATE_FREQ_EXP)
         a = association(lift, cfg)
         a[co_n < cfg.MIN_COOCCURRENCE] = 0.0
         conf = co_n / (co_n + cfg.SHRINK_K)
@@ -368,7 +370,7 @@ def drivers_for(
         if n < cfg.MIN_COOCCURRENCE:
             continue
         pac = index.weights[rows].sum() / index.W
-        lift = pac / (p[index.mod_pos[a]] * p[j])
+        lift = pac / (p[index.mod_pos[a]] * p[j] ** cfg.CANDIDATE_FREQ_EXP)
         contrib = float(association(np.array([lift]), cfg)[0]) * n / (n + cfg.SHRINK_K)
         contrib *= scores.idf[a]
         if contrib <= 0:

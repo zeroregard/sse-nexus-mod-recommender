@@ -175,7 +175,8 @@ def print_why(rec: Recommendation, rank: int | None, notes: Iterable[str], fmt: 
     t.add_column("Shared collections", ratio=4)
     for d in rec.drivers:
         t.add_row(
-            f"{d.name or '?'} [{d.mod_id}]",
+            f"{d.name or '?'} [{d.mod_id}]"
+            + (f"\n[dim]+{len(d.similar)} similar mods of yours[/dim]" if d.similar else ""),
             f"{d.contribution:.3f}",
             f"{d.lift:.1f}",
             f"{d.idf:.2f}",

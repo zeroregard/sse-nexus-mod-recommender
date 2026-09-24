@@ -127,12 +127,16 @@ DEDUPE_JACCARD = 0.8
 # --- association ------------------------------------------------------------
 # "ppmi": max(0, log(lift))   "lift": max(0, lift - 1)
 ASSOCIATION = "ppmi"
+# lift = p(A,C) / (p(A) · p(C)^CANDIDATE_FREQ_EXP). 1.0 is textbook lift; <1
+# ("context distribution smoothing") stops lift from exploding for candidates
+# that are in only a handful of collections, which is mostly noise.
+CANDIDATE_FREQ_EXP = 0.5
 # Ignore pairs that co-occur in fewer distinct (deduped) collections than this.
-MIN_COOCCURRENCE = 2
+MIN_COOCCURRENCE = 3
 # Shrink small-sample associations: confidence = n / (n + SHRINK_K).
-SHRINK_K = 3.0
+SHRINK_K = 10.0
 # A candidate must appear in at least this many deduped collections.
-MIN_CANDIDATE_COLLECTIONS = 3
+MIN_CANDIDATE_COLLECTIONS = 5
 
 # Your mods whose collection sets overlap at least this much (Jaccard) form a
 # "driver group" that contributes once (its strongest member), not once per
@@ -168,8 +172,8 @@ FILTER_REQUIRED_BY_INSTALLED = True
 LIBRARY_REQUIRING_THRESHOLD = 150
 LIBRARY_PENALTY = 0.5
 # Per unmet Nexus requirement of the candidate (you'd have to install more).
-MISSING_REQUIREMENT_PENALTY = 0.9
-MISSING_REQUIREMENT_MIN_FACTOR = 0.5
+MISSING_REQUIREMENT_PENALTY = 0.6
+MISSING_REQUIREMENT_MIN_FACTOR = 0.3
 
 # --- diversity --------------------------------------------------------------
 MAX_PER_CATEGORY = 4

@@ -125,8 +125,40 @@ your mods). *Niche recall* only counts held-out mods at or below the median
 collection frequency. That's the number that shows whether modrec does its
 actual job.
 
-Example, 300 collections indexed, `evaluate --collections 60`: *(see the
-"Results" section below. It's regenerated when weights change.)*
+### Results (default weights, 300 collections crawled 2026-09-24)
+
+`evaluate --collections 60` hides 10 mods from each stand-in collection.
+About 43 of the 60 sampled collections had enough recoverable mods:
+
+| seed | modrec recall@25 / niche | popularity | raw co-occurrence |
+|---|---|---|---|
+| 0 | **17.0% / 7.2%** | 8.6% / 0.0% | 10.5% / 0.0% |
+| 1 | **15.0% / 5.6%** | 6.4% / 0.0% | 7.6% / 0.0% |
+| 2 | **14.2% / 4.5%** | 7.9% / 0.0% | 9.3% / 0.0% |
+
+modrec recovers about twice as many hidden mods as either baseline. It's the
+only method that recovers any *niche* ones, which is the point. The absolute
+numbers are modest: the top 25 is picked out of about 17k mods, and the
+stand-in users are other people's lists.
+
+Things the benchmark caught during tuning (all reflected in `config.py`):
+
+- Textbook lift over-rewards candidates that appear in only a handful of
+  collections. `CANDIDATE_FREQ_EXP = 0.5` (dividing by p(C)^0.5, as in
+  word-embedding PMI) raised recall from 6% to 11%.
+- Weak evidence is noise. `SHRINK_K = 10`, `MIN_COOCCURRENCE = 3` and
+  `MIN_CANDIDATE_COLLECTIONS = 5` gave the next jump.
+- **Driver groups.** A stand-in user whose list was about 50 mods from one
+  author's series had those 50 mods counting the same few collections 50
+  times, which swamped everything else. Mods of yours whose collection sets
+  overlap (Jaccard ≥ `DRIVER_GROUP_JACCARD`) now act as one driver. The
+  explanation shows them as "+N similar mods of yours".
+
+Evaluating a *single* personal list (the default mode) is noisy when only a
+few of your mods can be recovered, since `evaluate` prints how many that is.
+Popular mods are also the easiest to recover, and modrec ranks them down on
+purpose. Use `--collections` to judge weight changes, and your own list for a
+sanity check.
 
 ## Tuning the weights
 
